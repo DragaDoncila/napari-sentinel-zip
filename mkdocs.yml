@@ -1,0 +1,10 @@
+site_name: napari-sentinel-zip
+site_description: Stacks and opens Sentinel mission zip archives for one tile across different timepoints.
+site_author: Draga Doncila Pop
+
+theme: readthedocs
+
+repo_url: https://github.com/DragaDoncila/napari-sentinel-zip
+
+pages:
+- Home: index.md
