@@ -10,7 +10,11 @@ Replace code below accordingly.  For complete documentation see:
 https://napari.org/docs/plugins/for_plugin_developers.html
 """
 import numpy as np
+import re
 from napari_plugin_engine import napari_hook_implementation
+from glob import glob
+
+SENTINEL_PATH_REGEX = re.compile(r"SENTINEL.*_[0-9]{8}.*\.zip")
 
 
 @napari_hook_implementation
@@ -28,17 +32,24 @@ def napari_get_reader(path):
         If the path is a recognized format, return a function that accepts the
         same path or list of paths, and returns a list of layer data tuples.
     """
+    # if we've been handed a single zip that's fine
+    if isinstance(path, str) and SENTINEL_PATH_REGEX.match(path):
+        return reader_function
+
+    # if we've been hnaded a list of SENTINEL zips, that's fine
     if isinstance(path, list):
-        # reader plugins may be handed single path, or a list of paths.
-        # if it is a list, it is assumed to be an image stack...
-        # so we are only going to look at the first file.
-        path = path[0]
-
-    # if we know we cannot read the file, we immediately return None.
-    if not path.endswith(".npy"):
+        # all paths within must be sentinel zips
+        for pth in path:
+            if not SENTINEL_PATH_REGEX.match(pth):
+                return None
+    
+    # if we've been handed a root directory with SENTINEL zips inside, that's fine
+    all_zips = glob(path + '/*.zip')
+    filtered_zips = filter(SENTINEL_PATH_REGEX.match, all_zips)
+    if not len(all_zips):
         return None
+    path = all_zips
 
-    # otherwise we return the *function* that can read ``path``.
     return reader_function
 
 
