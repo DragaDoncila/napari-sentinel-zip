@@ -22,7 +22,7 @@ with open('requirements.txt') as f:
 
 
 # https://github.com/pypa/setuptools_scm
-use_scm = {"write_to": "napari_napari_sentinel_zip/_version.py"}
+use_scm = {"write_to": "napari_sentinel_zip/_version.py"}
 
 setup(
     name='napari-sentinel-zip',
@@ -55,7 +55,7 @@ setup(
     ],
     entry_points={
         'napari.plugin': [
-            'sentinel-zip = napari_napari_sentinel_zip',
+            'napari-sentinel-zip = napari_sentinel_zip.napari_sentinel_zip',
         ],
     },
 )
