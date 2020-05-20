@@ -1,13 +1,7 @@
+__version__ = '0.0.1'
+
 """
-This module is an example of a barebones numpy reader plugin for napari.
-
-It implements the ``napari_get_reader`` hook specification, (to create
-a reader plugin) but your plugin may choose to implement any of the hook
-specifications offered by napari.
-see: https://napari.org/docs/plugins/hook_specifications.html
-
-Replace code below accordingly.  For complete documentation see:
-https://napari.org/docs/plugins/for_plugin_developers.html
+This module stacks and loads Sentinel ZIP images into napari.
 """
 import numpy as np
 import re
@@ -22,7 +16,7 @@ from glob import glob
 from collections import defaultdict
 from skimage.io import imread
 
-SENTINEL_PATH_REGEX = re.compile(r"SENTINEL.*_[0-9]{8}.*\.zip")
+SENTINEL_PATH_REGEX = re.compile(r".*SENTINEL.*_[0-9]{8}.*\.zip")
 
 # each zip file contains many bands, ie channels
 BANDS = [
@@ -71,14 +65,14 @@ IM_SHAPES = [
     (5490, 5490),
 ]
 
-SCALES = 10980 * 10 / np.array(IM_SHAPES)  # 10m per pix is highest res
+SCALES = np.concatenate([np.ones((len(IM_SHAPES), 1)), 10980 * 10 / np.array(IM_SHAPES)], axis=1)  # 10m per pix is highest res
 OFFSETS = [(5, 5) if shape[0] == 5490 else (0, 0) for shape in IM_SHAPES]
 SHAPES = dict(zip(BANDS, IM_SHAPES))
 OFFSETS = dict(zip(BANDS, OFFSETS))
 SCALES = dict(zip(BANDS, SCALES))
 
 CONTRAST_LIMITS = [-1000, 19_000]
-QKL_SCALE = (109.8, 109.8)
+QKL_SCALE = (1, 109.8, 109.8)
 
 @dask.delayed
 def ziptiff2array(zip_filename, path_to_tiff):
@@ -129,7 +123,7 @@ def napari_get_reader(path):
         for pth in path:
             if not SENTINEL_PATH_REGEX.match(pth):
                 return None
-    return reader_function
+        return reader_function
 
     # if we've been handed a single zip that's fine
     if isinstance(path, str) and SENTINEL_PATH_REGEX.match(path):
@@ -137,8 +131,8 @@ def napari_get_reader(path):
     
     # if we've been handed a root directory with SENTINEL zips inside, that's fine
     all_zips = glob(path + '/*.zip')
-    filtered_zips = filter(SENTINEL_PATH_REGEX.match, all_zips)
-    if not len(all_zips):
+    filtered_zips = list(filter(SENTINEL_PATH_REGEX.match, all_zips))
+    if not all_zips:
         return None
 
     return reader_function
@@ -220,22 +214,24 @@ def reader_function(path):
             colormap = colormaps[band]
             blending = 'additive' if colormaps[band] != 'gray' else 'translucent'
             add_kwargs = {
-                name=band,
-                is_pyramid=False,
-                scale=SCALES[band],
-                colormap=colormap,
-                blending=blending,
-                visible=False,
-                contrast_limits=CONTRAST_LIMITS
+                "name": band,
+                "multiscale": False,
+                "scale": SCALES[band],
+                "colormap": colormap,
+                "blending": blending,
+                "visible": False,
+                "contrast_limits": CONTRAST_LIMITS
             }
         else:
             add_kwargs = {
-                name=band,
-                is_pyramid=False,
-                scale=QKL_SCALE,
-                rgb=True,
-                visible=True,
-                contrast_limits=CONTRAST_LIMITS
+                "name": band,
+                "multiscale": False,
+                "scale": QKL_SCALE,
+                "rgb": True,
+                "visible": True,
+                "contrast_limits": CONTRAST_LIMITS
             }
         layer_list.append((image, add_kwargs, layer_type))
     return layer_list
+
+
