@@ -7,7 +7,6 @@ import numpy as np
 import re
 import os
 import tifffile
-import napari
 import zipfile
 import dask
 import dask.array as da
