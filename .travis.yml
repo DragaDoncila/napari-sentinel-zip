@@ -4,6 +4,9 @@ python:
 before_install:
   - pip install pytest pytest-cov
   - pip install coveralls
+install:
+  - pip install -r requirements.txt
+  - pip install -e .
 script:
   - py.test .
 after-sucess:
