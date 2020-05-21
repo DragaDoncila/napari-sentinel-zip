@@ -4,9 +4,8 @@ python:
 before_install:
   - pip install pytest pytest-cov
   - pip install coveralls
-  - python setup.py sdist bdist_wheel
+  - python setup.py install .
 script:
-  - ls -a
   - py.test .
 after-sucess:
   - if [[ $ENV == python=3.8* ]]; then
