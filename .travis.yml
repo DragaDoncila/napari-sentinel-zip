@@ -4,7 +4,7 @@ python:
 before_install:
   - pip install pytest pytest-cov
   - pip install coveralls
-  - python setup.py install
+  - python setup.py sdist bdist-wheel
 script:
   - py.test .
 after-sucess:
