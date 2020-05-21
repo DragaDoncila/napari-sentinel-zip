@@ -8,5 +8,4 @@ install:
 script:
   - tox
 after-sucess:
-  - ls -l
   - codecov
