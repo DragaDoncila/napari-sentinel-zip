@@ -1,12 +1,11 @@
 language: python
 python:
   - "3.8"
-before_install:
+install:
   - pip install pytest pytest-cov
   - pip install codecov
+  - pip install tox-travis
 script:
-  - py.test .
+  - tox
 after-sucess:
-  - if [[ $ENV == python=3.8* ]]; then
-      codecov;
-    fi
+  - codecov
