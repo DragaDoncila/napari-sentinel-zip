@@ -1,4 +1,4 @@
-__version__ = '0.0.1'
+__version__ = '0.1.1'
 
 """
 This module stacks and loads Sentinel ZIP images into napari.
@@ -193,7 +193,7 @@ def reader_function(path):
         open_jpg = zip_obj.open(path)
         image = imread(open_jpg)
         jpg_stack.append(image)
-    images['QKL_ALL'] = da.stack(jpg_stack)
+    jpg_im = da.stack(jpg_stack)
 
     # decide on colourmap
     colormaps = defaultdict(lambda: 'gray')
@@ -208,29 +208,30 @@ def reader_function(path):
 
     layer_list = []
     layer_type = "image"
+    add_kwargs = {
+        "name": 'QKL_ALL',
+        "multiscale": False,
+        "scale": QKL_SCALE,
+        "rgb": True,
+        "visible": True,
+        "contrast_limits": CONTRAST_LIMITS
+    }
+    layer_list.append((jpg_im, add_kwargs, layer_type))
+
     for band, image in images.items():
-        if band != "QKL_ALL":
-            colormap = colormaps[band]
-            blending = 'additive' if colormaps[band] != 'gray' else 'translucent'
-            add_kwargs = {
-                "name": band,
-                "multiscale": False,
-                "scale": SCALES[band],
-                "colormap": colormap,
-                "blending": blending,
-                "visible": False,
-                "contrast_limits": CONTRAST_LIMITS
-            }
-        else:
-            add_kwargs = {
-                "name": band,
-                "multiscale": False,
-                "scale": QKL_SCALE,
-                "rgb": True,
-                "visible": True,
-                "contrast_limits": CONTRAST_LIMITS
-            }
+        colormap = colormaps[band]
+        blending = 'additive' if colormaps[band] != 'gray' else 'translucent'
+        add_kwargs = {
+            "name": band,
+            "multiscale": False,
+            "scale": SCALES[band],
+            "colormap": colormap,
+            "blending": blending,
+            "visible": False,
+            "contrast_limits": CONTRAST_LIMITS
+        }
         layer_list.append((image, add_kwargs, layer_type))
+    
     return layer_list
 
 

@@ -14,6 +14,7 @@ for root, dirnames, filenames in os.walk(TEST_TILE_PATH):
 
 
 IM_SHAPES = [
+    (1000, 1000, 3), #QKL
     (5490, 5490),
     (5490, 5490),
     (10980, 10980),
@@ -33,8 +34,7 @@ IM_SHAPES = [
     (5490, 5490),
     (5490, 5490),
     (10980, 10980),
-    (5490, 5490),
-    (1000, 1000, 3) #QKL
+    (5490, 5490)
 ]
 
 
@@ -43,7 +43,7 @@ def check_layer_list_structure(layer_list, num_ims, num_layers):
     assert isinstance(layer_list, list), "reader does not return list"
 
     # layer list must have expected number of layers
-    assert len(layer_list) == num_layers, f"Layer list has {len(layer_list)} layers, expected {NUM_LAYERS}"
+    assert len(layer_list) == num_layers, f"Layer list has {len(layer_list)} layers, expected {num_layers}"
 
     for i in range(len(layer_list)):
         layer = layer_list[i]
