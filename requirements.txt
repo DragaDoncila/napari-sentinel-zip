@@ -3,4 +3,4 @@ numpy
 tifffile
 dask[array]
 scikit-image
-napari[components]
+napari[all]
