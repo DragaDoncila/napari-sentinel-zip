@@ -26,7 +26,7 @@ use_scm = {"write_to": "napari_sentinel_zip/_version.py"}
 
 setup(
     name='napari-sentinel-zip',
-    version='0.1.1',
+    version='0.1.2',
     author='Draga Doncila Pop',
     author_email='ddon0001@student.monash.edu',
     license='MIT',

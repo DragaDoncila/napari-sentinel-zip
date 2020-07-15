@@ -1,4 +1,4 @@
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 """
 This module stacks and loads Sentinel ZIP images into napari.
@@ -31,9 +31,9 @@ BANDS = [
     "FRE_B8A",
     "SRE_B11",
     "SRE_B12",
-    "SRE_B2",  # surface reflectance, red
+    "SRE_B2",  # surface reflectance, blue
     "SRE_B3",  # surface reflectance, green
-    "SRE_B4",  # surface reflectance, blue
+    "SRE_B4",  # surface reflectance, red
     "SRE_B5",
     "SRE_B6",
     "SRE_B7",
@@ -199,11 +199,11 @@ def reader_function(path):
     colormaps = defaultdict(lambda: 'gray')
     for band in BANDS:
         if band.endswith('B2'):
-            colormaps[band] = 'red'
+            colormaps[band] = 'blue'
         elif band.endswith('B3'):
             colormaps[band] = 'green'
         elif band.endswith('B4'):
-            colormaps[band] = 'blue'
+            colormaps[band] = 'red'
 
 
     layer_list = []
@@ -218,6 +218,7 @@ def reader_function(path):
     }
     layer_list.append((jpg_im, add_kwargs, layer_type))
 
+    
     for band, image in images.items():
         colormap = colormaps[band]
         blending = 'additive' if colormaps[band] != 'gray' else 'translucent'
