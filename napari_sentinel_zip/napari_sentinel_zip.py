@@ -70,6 +70,14 @@ SHAPES = dict(zip(BANDS, IM_SHAPES))
 OFFSETS = dict(zip(BANDS, OFFSETS))
 SCALES = dict(zip(BANDS, SCALES))
 
+# add scales for the mask layers
+MASK_SHAPES = [
+    (10980, 10980),
+    (5490, 5490),
+]
+SCALES['EDG_R1'] = (1, 10, 10)
+SCALES['EDG_R2'] = (1, 20, 20)
+
 CONTRAST_LIMITS = [-1000, 19_000]
 QKL_SCALE = (1, 109.8, 109.8)
 
@@ -183,6 +191,19 @@ def reader_function(path):
             stack.append(image)
 
         images[band] = da.stack(stack)
+    
+    # get the edge masks
+    masks = {}
+    for idx, shape in zip((1, 2), IM_SHAPES):
+        stack = []
+        for fn in paths:
+            basepath = os.path.splitext(os.path.basename(fn))[0]
+            path = basepath + '/MASKS/' + basepath + f'_EDG_R{idx}.tif'
+            image = da.from_delayed(
+                ziptiff2array(fn, path), shape=shape, dtype=np.uint8
+            )
+            stack.append(image)
+        masks[f'EDG_R{idx}'] = da.stack(stack)
 
     # get the quicklook jpg
     jpg_stack = []
@@ -218,6 +239,13 @@ def reader_function(path):
     }
     layer_list.append((jpg_im, add_kwargs, layer_type))
 
+    for mask_band, mask in masks.items():
+        add_kwargs = {
+            "name": mask_band,
+            "scale": SCALES[mask_band],
+            "visible": False,
+        }
+        layer_list.append((mask, add_kwargs, 'labels'))
     
     for band, image in images.items():
         colormap = colormaps[band]
