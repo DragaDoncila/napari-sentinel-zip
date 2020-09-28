@@ -4,6 +4,7 @@
 [![PyPI](https://img.shields.io/pypi/v/napari-sentinel-zip.svg?color=green)](https://pypi.org/project/napari-sentinel-zip)
 [![Python Version](https://img.shields.io/pypi/pyversions/napari-sentinel-zip.svg?color=green)](https://python.org)
 [![codecov](https://codecov.io/gh/DragaDoncila/napari-sentinel-zip/branch/master/graph/badge.svg)](https://codecov.io/gh/DragaDoncila/napari-sentinel-zip)
+[![travis](https://travis-ci.org/DragaDoncila/napari-sentinel-zip.svg?branch=master)](https://travis-ci.org/github/DragaDoncila/napari-sentinel-zip)
 
 Stacks and opens Sentinel mission zip archives for one tile across different timepoints.
 
