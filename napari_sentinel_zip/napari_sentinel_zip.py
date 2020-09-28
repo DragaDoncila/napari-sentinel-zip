@@ -194,7 +194,7 @@ def reader_function(path):
     
     # get the edge masks
     masks = {}
-    for idx, shape in zip((1, 2), IM_SHAPES):
+    for idx, shape in zip((1, 2), MASK_SHAPES):
         stack = []
         for fn in paths:
             basepath = os.path.splitext(os.path.basename(fn))[0]
