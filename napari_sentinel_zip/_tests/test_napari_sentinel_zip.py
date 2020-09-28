@@ -15,6 +15,8 @@ for root, dirnames, filenames in os.walk(TEST_TILE_PATH):
 
 IM_SHAPES = [
     (1000, 1000, 3), #QKL
+    (10980, 10980), #Mask
+    (5490, 5490),   #Mask
     (5490, 5490),
     (5490, 5490),
     (10980, 10980),
@@ -50,7 +52,7 @@ def check_layer_list_structure(layer_list, num_ims, num_layers):
         # all elements in the layers must be tuples
         assert isinstance(layer, tuple), f"Layer list element {i} is not tuple"
 
-            # each data in tuples must have correct shape
+        # each data in tuples must have correct shape
         expected_shape = tuple([num_ims] + [im_axis_shape for im_axis_shape in IM_SHAPES[i]])
         assert layer[0].shape == expected_shape,\
         f"Layer {i} has shape {layer[0].shape}, expected {expected_shape}"
@@ -68,7 +70,7 @@ def check_viewer_open_structure(path, num_layers, num_dims):
 
 def test_reader_with_list():
     NUM_IMS = 10
-    NUM_LAYERS = 21
+    NUM_LAYERS = 23
     NUM_DIMS = 3
 
     reader = napari_get_reader(TEST_ZIP_PATH_LIST)
@@ -81,7 +83,7 @@ def test_reader_with_list():
     for layer in layer_list:
         v.add_image(layer[0], **layer[1])
 
-    # viewer must have 21 layers after opening
+    # viewer must have 23 layers after opening
     assert len(v.layers) == NUM_LAYERS, f"Expected {NUM_LAYERS} layers after opening in napari viewer, got {len(v.layers)}"
     # viewer should have 3 dimensions after opening
     assert v.dims.ndim == NUM_DIMS, f"Expected {NUM_DIMS} dimensions after opening in napari viewer, got {v.dims.ndim}"
@@ -89,7 +91,7 @@ def test_reader_with_list():
 
 def test_reader_with_string_path():
     NUM_IMS = 1
-    NUM_LAYERS = 21
+    NUM_LAYERS = 23
     NUM_DIMS = 3
 
     reader = napari_get_reader(TEST_ONE_ZIP_PATH)
@@ -103,7 +105,7 @@ def test_reader_with_string_path():
 
 def test_reader_with_root_directory():
     NUM_IMS = 10
-    NUM_LAYERS = 21
+    NUM_LAYERS = 23
     NUM_DIMS = 3
 
     reader = napari_get_reader(TEST_TILE_PATH)

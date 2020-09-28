@@ -108,6 +108,18 @@ def ziptiff2array(zip_filename, path_to_tiff):
         image = tiff_f.pages[0].asarray()
     return image
 
+def sort_timestamps(path_list):
+    timestamp_regex = re.compile(".*([0-9]{8}-[0-9]{6}-[0-9]{3}).*.zip")
+    timestamp_dict = {}
+    for path in path_list:
+        match = timestamp_regex.match(path)
+        if match:
+            timestamp = match.groups()[0]
+            timestamp_dict[timestamp] = path
+    sorted_paths = []
+    for timestamp in sorted(timestamp_dict.keys()):
+        sorted_paths.append(timestamp_dict[timestamp])
+    return sorted_paths
 
 @napari_hook_implementation
 def napari_get_reader(path):
@@ -172,10 +184,12 @@ def reader_function(path):
         paths = [path]
     # list of sentinel zips
     elif isinstance(path, list):
-        paths = sorted(path)
+        paths = path
     # one root directory path with multiple sentinel zips inside
     else:
-        paths = sorted(filter(SENTINEL_PATH_REGEX.match, glob(path + "/*.zip")))
+        paths = list(filter(SENTINEL_PATH_REGEX.match, glob(path + "/*.zip")))
+
+    paths = sort_timestamps(paths)
     
     # stack all timepoints together for each band
     images = {}

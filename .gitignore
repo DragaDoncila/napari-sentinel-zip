@@ -79,3 +79,6 @@ target/
 
 # written by setuptools_scm
 */_version.py
+
+# misc
+*/_tests/test_loading.py
