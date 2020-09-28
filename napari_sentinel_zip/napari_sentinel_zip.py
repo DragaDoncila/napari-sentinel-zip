@@ -108,6 +108,18 @@ def ziptiff2array(zip_filename, path_to_tiff):
         image = tiff_f.pages[0].asarray()
     return image
 
+def sort_timestamps(path_list):
+    timestamp_regex = re.compile(".*([0-9]{8}-[0-9]{6}-[0-9]{3}).*.zip")
+    timestamp_dict = {}
+    for path in path_list:
+        match = timestamp_regex.match(path)
+        if match:
+            timestamp = match.groups()[0]
+            timestamp_dict[timestamp] = path
+    sorted_paths = []
+    for timestamp in sorted(timestamp_dict.keys()):
+        sorted_paths.append(timestamp_dict[timestamp])
+    return sorted_paths
 
 @napari_hook_implementation
 def napari_get_reader(path):
@@ -172,95 +184,98 @@ def reader_function(path):
         paths = [path]
     # list of sentinel zips
     elif isinstance(path, list):
-        paths = sorted(path)
+        paths = path
     # one root directory path with multiple sentinel zips inside
     else:
-        paths = sorted(filter(SENTINEL_PATH_REGEX.match, glob(path + "/*.zip")))
+        paths = list(filter(SENTINEL_PATH_REGEX.match, glob(path + "/*.zip")))
+
+    paths = sort_timestamps(paths)
     
     # stack all timepoints together for each band
-    images = {}
-    for band, shape in zip(BANDS, IM_SHAPES):
-        stack = []
-        for fn in paths:
-            # get all the tiffs
-            basepath = os.path.splitext(os.path.basename(fn))[0]
-            path = basepath + '/' + basepath + '_' + band + '.tif'
-            image = da.from_delayed(
-                ziptiff2array(fn, path), shape=shape, dtype=np.int16
-            )
-            stack.append(image)
+    # images = {}
+    # for band, shape in zip(BANDS, IM_SHAPES):
+    #     stack = []
+    #     for fn in paths:
+    #         # get all the tiffs
+    #         basepath = os.path.splitext(os.path.basename(fn))[0]
+    #         path = basepath + '/' + basepath + '_' + band + '.tif'
+    #         image = da.from_delayed(
+    #             ziptiff2array(fn, path), shape=shape, dtype=np.int16
+    #         )
+    #         stack.append(image)
 
-        images[band] = da.stack(stack)
+    #     images[band] = da.stack(stack)
     
-    # get the edge masks
-    masks = {}
-    for idx, shape in zip((1, 2), MASK_SHAPES):
-        stack = []
-        for fn in paths:
-            basepath = os.path.splitext(os.path.basename(fn))[0]
-            path = basepath + '/MASKS/' + basepath + f'_EDG_R{idx}.tif'
-            image = da.from_delayed(
-                ziptiff2array(fn, path), shape=shape, dtype=np.uint8
-            )
-            stack.append(image)
-        masks[f'EDG_R{idx}'] = da.stack(stack)
+    # # get the edge masks
+    # masks = {}
+    # for idx, shape in zip((1, 2), MASK_SHAPES):
+    #     stack = []
+    #     for fn in paths:
+    #         basepath = os.path.splitext(os.path.basename(fn))[0]
+    #         path = basepath + '/MASKS/' + basepath + f'_EDG_R{idx}.tif'
+    #         image = da.from_delayed(
+    #             ziptiff2array(fn, path), shape=shape, dtype=np.uint8
+    #         )
+    #         stack.append(image)
+    #     masks[f'EDG_R{idx}'] = da.stack(stack)
 
-    # get the quicklook jpg
-    jpg_stack = []
-    for fn in paths:
-        basepath = os.path.splitext(os.path.basename(fn))[0]
-        path = basepath + '/' + basepath + '_' + 'QKL_ALL.jpg'
-        zip_obj = zipfile.ZipFile(fn)
-        open_jpg = zip_obj.open(path)
-        image = imread(open_jpg)
-        jpg_stack.append(image)
-    jpg_im = da.stack(jpg_stack)
+    # # get the quicklook jpg
+    # jpg_stack = []
+    # for fn in paths:
+    #     basepath = os.path.splitext(os.path.basename(fn))[0]
+    #     path = basepath + '/' + basepath + '_' + 'QKL_ALL.jpg'
+    #     zip_obj = zipfile.ZipFile(fn)
+    #     open_jpg = zip_obj.open(path)
+    #     image = imread(open_jpg)
+    #     jpg_stack.append(image)
+    # jpg_im = da.stack(jpg_stack)
 
-    # decide on colourmap
-    colormaps = defaultdict(lambda: 'gray')
-    for band in BANDS:
-        if band.endswith('B2'):
-            colormaps[band] = 'blue'
-        elif band.endswith('B3'):
-            colormaps[band] = 'green'
-        elif band.endswith('B4'):
-            colormaps[band] = 'red'
+    # # decide on colourmap
+    # colormaps = defaultdict(lambda: 'gray')
+    # for band in BANDS:
+    #     if band.endswith('B2'):
+    #         colormaps[band] = 'blue'
+    #     elif band.endswith('B3'):
+    #         colormaps[band] = 'green'
+    #     elif band.endswith('B4'):
+    #         colormaps[band] = 'red'
 
 
-    layer_list = []
-    layer_type = "image"
-    add_kwargs = {
-        "name": 'QKL_ALL',
-        "multiscale": False,
-        "scale": QKL_SCALE,
-        "rgb": True,
-        "visible": True,
-        "contrast_limits": CONTRAST_LIMITS
-    }
-    layer_list.append((jpg_im, add_kwargs, layer_type))
+    # layer_list = []
+    # layer_type = "image"
+    # add_kwargs = {
+    #     "name": 'QKL_ALL',
+    #     "multiscale": False,
+    #     "scale": QKL_SCALE,
+    #     "rgb": True,
+    #     "visible": True,
+    #     "contrast_limits": CONTRAST_LIMITS
+    # }
+    # layer_list.append((jpg_im, add_kwargs, layer_type))
 
-    for mask_band, mask in masks.items():
-        add_kwargs = {
-            "name": mask_band,
-            "scale": SCALES[mask_band],
-            "visible": False,
-        }
-        layer_list.append((mask, add_kwargs, 'labels'))
+    # for mask_band, mask in masks.items():
+    #     add_kwargs = {
+    #         "name": mask_band,
+    #         "scale": SCALES[mask_band],
+    #         "visible": False,
+    #     }
+    #     layer_list.append((mask, add_kwargs, 'labels'))
     
-    for band, image in images.items():
-        colormap = colormaps[band]
-        blending = 'additive' if colormaps[band] != 'gray' else 'translucent'
-        add_kwargs = {
-            "name": band,
-            "multiscale": False,
-            "scale": SCALES[band],
-            "colormap": colormap,
-            "blending": blending,
-            "visible": False,
-            "contrast_limits": CONTRAST_LIMITS
-        }
-        layer_list.append((image, add_kwargs, layer_type))
+    # for band, image in images.items():
+    #     colormap = colormaps[band]
+    #     blending = 'additive' if colormaps[band] != 'gray' else 'translucent'
+    #     add_kwargs = {
+    #         "name": band,
+    #         "multiscale": False,
+    #         "scale": SCALES[band],
+    #         "colormap": colormap,
+    #         "blending": blending,
+    #         "visible": False,
+    #         "contrast_limits": CONTRAST_LIMITS
+    #     }
+    #     layer_list.append((image, add_kwargs, layer_type))
     
-    return layer_list
+    # return layer_list
+    return []
 
 
