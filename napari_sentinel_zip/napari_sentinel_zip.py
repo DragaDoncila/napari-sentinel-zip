@@ -1,4 +1,4 @@
-__version__ = '0.1.2'
+__version__ = '0.2.0'
 
 """
 This module stacks and loads Sentinel ZIP images into napari.
