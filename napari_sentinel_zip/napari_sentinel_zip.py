@@ -191,7 +191,7 @@ def reader_function(path):
 
     paths = sort_timestamps(paths)
     
-    stack all timepoints together for each band
+    # stack all timepoints together for each band
     images = {}
     for band, shape in zip(BANDS, IM_SHAPES):
         stack = []
