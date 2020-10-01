@@ -6,7 +6,7 @@ import napari.components
 TEST_TILE_PATH = os.path.abspath("./napari_sentinel_zip/_tests/Test_Tile")
 
 TEST_ONE_ZIP_PATH = os.path.abspath(
-    "./napari_sentinel_zip/_tests/Test_Tile/SENTINEL2A_20171008-002414-496_L2A_T55HBU_C_V1-0.zip"
+    "./napari_sentinel_zip/_tests/Test_Tile/SENTINEL2A_20180215-002152-794_L2A_T55HBV_C_V1-0.zip"
     )
 
 for root, dirnames, filenames in os.walk(TEST_TILE_PATH):
